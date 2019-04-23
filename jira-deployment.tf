@@ -54,15 +54,15 @@ resource "kubernetes_deployment" "jira-deployment" {
 
         container {
           name  = "jira-container"
-          image = "fsadykov/docker-jira"
+          image = "gcr.io/hightowerlabs/jira:7.3.6-standalone"
 
           port {
             name           = "jira-http"
-            container_port = 8081
+            container_port = 8090
           }
           port {
             name           = "docker-repo"
-            container_port = 8085
+            container_port = 8090
           }
 
           env {
@@ -102,8 +102,8 @@ resource "kubernetes_service" "jira-service" {
     port {
       name        = "docker-repo"
       protocol    = "TCP"
-      port        = 8085
-      target_port = 8085
+      port        = 8091
+      target_port = 8090
     }
     selector {
       app = "jira-deployment"
