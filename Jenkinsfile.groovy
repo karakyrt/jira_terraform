@@ -11,25 +11,25 @@ node('master') {
     )])
     checkout scm
     stage('Generate Vars') {
-        def file = new File("${WORKSPACE}/jira_terraform/jira.tfvars")
+        def file = new File("${WORKSPACE}/jira.tfvars")
         file.write """
         namespace             =  "${namespace}"
         """
       }
     stage("Terraform init") {
-      dir("${workspace}/jira_terraform/") {
+      dir("${workspace}/") {
         sh "terraform init"
       }
     }
     stage("Terraform Apply/Plan"){
       if (!params.terraformDestroy) {
         if (params.terraformApply) {
-          dir("${workspace}/jira_terraform/") {
+          dir("${workspace}/") {
             echo "##### Terraform Applying the Changes ####"
             sh "terraform apply --auto-approve -var-file=jira.tfvars"
         }
       } else {
-          dir("${WORKSPACE}/jira_terraform") {
+          dir("${WORKSPACE}/") {
             echo "##### Terraform Plan (Check) the Changes ####"
             sh "terraform plan -var-file=jira.tfvars"
           }
@@ -39,7 +39,7 @@ node('master') {
     stage('Terraform Destroy') {
       if (!params.terraformApply) {
         if (params.terraformDestroy) {
-          dir("${WORKSPACE}/jira_terraform") {
+          dir("${WORKSPACE}/") {
             echo "##### Terraform Destroying ####"
             sh "terraform destroy --auto-approve -var-file=jira.tfvars"
           }
