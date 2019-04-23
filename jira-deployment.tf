@@ -1,10 +1,10 @@
-resource "kubernetes_persistent_volume_claim" "nexus-pvc" {
+resource "kubernetes_persistent_volume_claim" "jira-pvc" {
   metadata {
-    name      = "nexus-pvc"
+    name      = "jira-pvc"
     namespace = "${var.namespace}"
 
     labels {
-      app = "nexus-deployment"
+      app = "jira-deployment"
     }
   }
 
@@ -18,13 +18,13 @@ resource "kubernetes_persistent_volume_claim" "nexus-pvc" {
     storage_class_name = "standard"
   }
 }
-resource "kubernetes_deployment" "nexus-deployment" {
+resource "kubernetes_deployment" "jira-deployment" {
   metadata {
-    name      = "nexus-deployment"
+    name      = "jira-deployment"
     namespace = "${var.namespace}"
 
     labels {
-      app = "nexus-deployment"
+      app = "jira-deployment"
     }
   }
   spec {
@@ -32,32 +32,32 @@ resource "kubernetes_deployment" "nexus-deployment" {
 
     selector {
         match_labels {
-            app = "nexus-deployment"
+            app = "jira-deployment"
         }
     }
 
     template {
       metadata {
         labels {
-          app = "nexus-deployment"
+          app = "jira-deployment"
         }
       }
 
       spec {
         volume {
-          name = "nexus-pvc"
+          name = "jira-pvc"
 
           persistent_volume_claim {
-            claim_name = "nexus-pvc"
+            claim_name = "jira-pvc"
           }
         }
 
         container {
-          name  = "nexus-container"
-          image = "fsadykov/docker-nexus"
+          name  = "jira-container"
+          image = "fsadykov/docker-jira"
 
           port {
-            name           = "nexus-http"
+            name           = "jira-http"
             container_port = 8081
           }
           port {
@@ -78,8 +78,8 @@ resource "kubernetes_deployment" "nexus-deployment" {
           }
 
           volume_mount {
-            name       = "nexus-pvc"
-            mount_path = "/var/lib/nexus"
+            name       = "jira-pvc"
+            mount_path = "/var/lib/jira"
           }
           image_pull_policy = "IfNotPresent"
         }
@@ -87,9 +87,9 @@ resource "kubernetes_deployment" "nexus-deployment" {
     }
   }
 }
-resource "kubernetes_service" "nexus-service" {
+resource "kubernetes_service" "jira-service" {
   metadata {
-    name      = "nexus-service"
+    name      = "jira-service"
     namespace = "${var.namespace}"
   }
   spec {
@@ -106,7 +106,7 @@ resource "kubernetes_service" "nexus-service" {
       target_port = 8085
     }
     selector {
-      app = "nexus-deployment"
+      app = "jira-deployment"
     }
     type = "LoadBalancer"
   }
