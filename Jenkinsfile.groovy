@@ -6,32 +6,32 @@ node('master') {
   properties([parameters([ 
     booleanParam(defaultValue: false, description: 'Apply All Changes', name: 'terraformApply'), 
     booleanParam(defaultValue: false, description: 'Destroy All', name: 'terraformDestroy'), 
-    string(defaultValue: 'test', description: 'Please provide namespace for nexus-deployment', name: 'namespace', trim: true)
+    string(defaultValue: 'test', description: 'Please provide namespace for jira-deployment', name: 'namespace', trim: true)
     ]
     )])
     checkout scm
     stage('Generate Vars') {
-        def file = new File("${WORKSPACE}/nexus_jenkins/nexus.tfvars")
+        def file = new File("${WORKSPACE}/jira_terraform/jira.tfvars")
         file.write """
         namespace             =  "${namespace}"
         """
       }
     stage("Terraform init") {
-      dir("${workspace}/nexus_jenkins/") {
+      dir("${workspace}/jira_terraform/") {
         sh "terraform init"
       }
     }
     stage("Terraform Apply/Plan"){
       if (!params.terraformDestroy) {
         if (params.terraformApply) {
-          dir("${workspace}/nexus_jenkins/") {
+          dir("${workspace}/jira_terraform/") {
             echo "##### Terraform Applying the Changes ####"
-            sh "terraform apply --auto-approve -var-file=nexus.tfvars"
+            sh "terraform apply --auto-approve -var-file=jira.tfvars"
         }
       } else {
-          dir("${WORKSPACE}/nexus_jenkins") {
+          dir("${WORKSPACE}/jira_terraform") {
             echo "##### Terraform Plan (Check) the Changes ####"
-            sh "terraform plan -var-file=nexus.tfvars"
+            sh "terraform plan -var-file=jira.tfvars"
           }
         }
       } 
@@ -39,9 +39,9 @@ node('master') {
     stage('Terraform Destroy') {
       if (!params.terraformApply) {
         if (params.terraformDestroy) {
-          dir("${WORKSPACE}/nexus_jenkins") {
+          dir("${WORKSPACE}/jira_terraform") {
             echo "##### Terraform Destroying ####"
-            sh "terraform destroy --auto-approve -var-file=nexus.tfvars"
+            sh "terraform destroy --auto-approve -var-file=jira.tfvars"
           }
         } 
       }
